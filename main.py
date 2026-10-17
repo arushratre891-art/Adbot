@@ -130,7 +130,7 @@ PLANS = [
         "videos": "40000+",
 
         "image": "https://ibb.co/QF2v05qK",
-        "qr": "https://ibb.co/gbLMg58r",
+        "qr": "https://ibb.co/BHRYXrw8",
 
         "demos": [
             {"type": "video", "id": "https://videotourl.com/videos/1791598317965-12b2368c-6035-4e43-b708-df28bcd246b6.mp4"},
