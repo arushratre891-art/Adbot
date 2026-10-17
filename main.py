@@ -47,7 +47,7 @@ bot = telebot.TeleBot(
 # SUPPORT
 # =========================================================
 
-SUPPORT_LINK = "https://t.me/@IGCCKINGHU"
+SUPPORT_LINK = "https://t.me/xylerigcc"
 
 
 # =========================================================
@@ -110,7 +110,8 @@ PLANS = [
              {
                 "type": "video",
                 "id": "https://videotourl.com/videos/1791609569957-a7ce2e8a-e185-4dc6-893c-298a2d9c1b4c.mp4"
-            }
+            }     
+        
         ],
 
         "caption": "1. 𝙔𝙊𝙐 𝘾𝘼𝙉 𝙎𝘼𝙑𝙀 𝙄𝙉 𝙂𝘼𝙇𝙇𝙀𝙍𝙔 ✅"
@@ -195,9 +196,9 @@ PLANS = [
             {"type": "video", "id": "https://videotourl.com/videos/1791611085614-c863517b-d989-4d6f-b6ef-d23db0b73f5a.mp4"},
             {"type": "video", "id": "https://videotourl.com/videos/1791611220352-ba6538bc-4db1-401e-81f7-88c53824e27f.mp4"},
             {"type": "video", "id": "https://videotourl.com/videos/1791611220352-ba6538bc-4db1-401e-81f7-88c53824e27f.mp4"},
-               {"type": "video", "id": "https://videotourl.com/videos/1791609479203-02acf86c-6132-4bc2-8041-9f43ab529748.mp4"},
              {"type": "video", "id": "https://videotourl.com/videos/1791611168222-86d679dd-8a24-46fb-8b06-d59cc97e84c2.mp4"},
-             {"type": "video", "id": "https://videotourl.com/videos/1791611005214-c25159ac-d514-4eff-8061-a25465ff6eba.mp4"}
+             {"type": "video", "id": "https://videotourl.com/videos/1791611005214-c25159ac-d514-4eff-8061-a25465ff6eba.mp4"},
+             {"type": "video", "id": "https://videotourl.com/videos/1791609479203-02acf86c-6132-4bc2-8041-9f43ab529748.mp4"}
         ],
         
  "caption": "1. 𝙔𝙊𝙐 𝘾𝘼𝙉 𝙎𝘼𝙑𝙀 𝙄𝙉 𝙂𝘼𝙇𝙇𝙀𝙍𝙔 ✅"
@@ -248,8 +249,8 @@ PLANS = [
             {"type": "video", "id": "https://videotourl.com/videos/1791607674607-203922d8-e261-4085-90fc-4be2fd62a6fb.mp4"},
             {"type": "video", "id": "https://videotourl.com/videos/1791607662133-116f8c11-861a-4d4c-94a4-411fbd79a4f4.mp4"},
             {"type": "video", "id": "https://videotourl.com/videos/1791607553470-a87b7709-29e5-449b-89d2-49ce97c8e367.mp4"},
+            {"type": "video", "id": "https://videotourl.com/videos/1791607585444-8a7d8e39-2917-4d23-949e-c048fcbacb2f.mp4"},
             {"type": "video", "id": "https://videotourl.com/videos/1791607607288-b1cc3341-7d49-473e-8544-840992806dab.mp4"},
-             {"type": "video", "id": "https://videotourl.com/videos/1791607585444-8a7d8e39-2917-4d23-949e-c048fcbacb2f.mp4"},
             {"type": "video", "id": "https://videotourl.com/videos/1791607617748-9c8da0dd-313e-4a4d-862b-7ccf034383b7.mp4"}
         ],
 
@@ -670,6 +671,853 @@ def send_plan(chat_id, plan):
         )
     )
 
+    
     kb.row(
         button(
-            " 𝘽𝘼𝘾?
+            " 𝘽𝘼𝘾𝙆",
+            data="home",
+            style="primary"
+        )
+    )
+
+    send_photo_or_text(
+        chat_id,
+        plan.get('image', ''),
+        caption,
+        kb
+    )
+
+# =========================================================
+# DEMO STATE
+# =========================================================
+#
+# demo_sessions[user_id] = {
+#     "plan_id": 1,
+#     "index": 0,
+#     "message_id": 123
+# }
+
+demo_sessions = {}
+
+
+# =========================================================
+# SEND ONE DEMO
+# =========================================================
+
+def send_demo(
+    chat_id,
+    user_id,
+    plan_id,
+    index,
+    delete_message_id=None
+):
+    plan = get_plan(plan_id)
+
+    if not plan:
+        bot.send_message(chat_id, "❌ Plan not found.")
+        return
+
+    # Keep photo/video links in the exact PLANS order
+    demos = [
+        d for d in plan.get("demos", [])
+        if (d.get("url") or d.get("id"))
+        and not str(d.get("id", "")).startswith("PASTE_")
+        and not str(d.get("url", "")).startswith("PASTE_")
+    ]
+
+    if index >= len(demos):
+        send_demo_over(chat_id, plan)
+        return
+
+    if delete_message_id:
+        try:
+            bot.delete_message(chat_id, delete_message_id)
+        except Exception:
+            log.exception("Could not delete previous demo")
+
+    demo = demos[index]
+    demo_type = demo.get("type", "video")
+    media = demo.get("url") or demo.get("id")
+
+    kb = InlineKeyboardMarkup()
+
+    kb.add(button(
+        "𝙉𝙀𝙓𝙏 𝘿𝙀𝙈𝙊 ➡️",
+        data=f"next_demo:{plan_id}:{index}",
+        style="primary"
+    ))
+
+    kb.add(button(
+        "𝘽𝘼𝘾𝙆 𝙏𝙊 𝙋𝙇𝘼𝙉",
+        data=f"plan:{plan_id}",
+        style="success"
+    ))
+
+    caption = (
+        f"🎬 <b>{plan['name']}</b>\n"
+        f"𝘿𝙚𝙢𝙤 {index + 1}/{len(demos)}"
+    )
+
+    try:
+        if demo_type == "photo":
+            sent = bot.send_photo(
+                chat_id,
+                media,
+                caption=caption,
+                parse_mode="HTML",
+                reply_markup=kb
+            )
+
+        elif demo_type == "video":
+            sent = bot.send_video(
+                chat_id,
+                media,
+                caption=caption,
+                parse_mode="HTML",
+                reply_markup=kb
+            )
+
+        else:
+            sent = bot.send_document(
+                chat_id,
+                media,
+                caption=caption,
+                parse_mode="HTML",
+                reply_markup=kb
+            )
+
+        demo_sessions[user_id] = {
+            "plan_id": plan_id,
+            "index": index,
+            "message_id": sent.message_id
+        }
+
+    except Exception:
+        log.exception("Could not send demo")
+        bot.send_message(
+            chat_id,
+            "❌ Demo nahi bhej paya. Direct media URL check karo."
+        )
+# =========================================================
+# DEMO OVER
+# =========================================================
+def send_demo_over(chat_id, plan):
+
+    kb = InlineKeyboardMarkup()
+
+    kb.row(
+        button(
+            "💎 𝘽𝙐𝙔 𝙋𝘼𝘾𝙆",
+            data=f"buy:{plan['id']}",
+            style="success"
+        )
+    )
+
+    kb.row(
+        button(
+            "🔙 𝘽𝘼𝘾𝙆 𝙏𝙊 𝙋𝙇𝘼𝙉",
+            data=f"plan:{plan['id']}",
+            style="primary"
+        )
+    )
+
+    text = (
+        "🚫 <b>𝘿𝙀𝙈𝙊 𝙊𝙑𝙀𝙍</b>\n\n"
+        "💎 <b>𝙋𝙇𝙀𝘼𝙎𝙀 𝙋𝙐𝙍𝘾𝙃𝘼𝙎𝙀 𝙋𝙍𝙀𝙈𝙄𝙐𝙈</b>\n\n"
+        "❤️ <b>𝙁𝙊𝙍 𝙈𝙊𝙍𝙀 𝙅𝙊𝙄𝙉 𝙃𝙀𝙍𝙀</b> "
+        "<a href='https://t.me/studyof12thc'>@studyof12thc</a>"
+    )
+
+    bot.send_message(
+        chat_id,
+        text,
+        parse_mode="HTML",
+        reply_markup=kb
+    )
+
+# =========================================================
+# PAYMENT
+# =========================================================
+
+def send_payment(chat_id, user_id, plan):
+
+    qr = plan.get("qr", "")
+
+    if not qr:
+        bot.send_message(
+            chat_id,
+            "⚠️ 𝙋𝙖𝙮𝙢𝙚𝙣𝙩 𝙌𝙍 𝙞𝙨 𝙣𝙤𝙩 𝙨𝙚𝙩 𝙮𝙚𝙩."
+        )
+        return
+
+    kb = InlineKeyboardMarkup()
+
+    kb.row(
+        button(
+            " 𝙄 𝙋𝘼𝙄𝘿 ✅",
+            data=f"paid:{plan['id']}",
+            style="success"
+        )
+    )
+
+    kb.row(
+        button(
+            " 𝘽𝘼𝘾𝙆 ⬅️",
+            data=f"plan:{plan['id']}",
+            style="primary"
+        )
+    )
+
+    caption = (
+        f"<b>𝙋𝘼𝙔𝙈𝙀𝙉𝙏 𝙋𝘼𝙂𝙀 💳: ₹{plan['price']}</b>\n\n"
+        "1️⃣ 𝙎𝙘𝙖𝙣 𝙩𝙝𝙚 𝙌𝙍.\n"
+        "2️⃣ 𝙋𝙖𝙮 𝙩𝙝𝙚 𝙚𝙭𝙖𝙘𝙩 𝙖𝙢𝙤𝙪𝙣𝙩.\n"
+        "3️⃣ 𝘾𝙡𝙞𝙘𝙠 <b>𝙄 𝙋𝘼𝙄𝘿 ✅</b>.\n"
+        "4️⃣ 𝙎𝙚𝙣𝙙 𝙥𝙖𝙮𝙢𝙚𝙣𝙩 𝙨𝙘𝙧𝙚𝙚𝙣𝙨𝙝𝙤𝙩. ✅"
+    )
+
+    send_photo_or_text(
+        chat_id,
+        qr,
+        caption,
+        kb
+    )
+# =========================================================
+# SCREENSHOT STATE
+# =========================================================
+
+waiting_screenshot = set()
+pending_orders = {}
+
+
+# =========================================================
+# START COMMAND
+# =========================================================
+
+@bot.message_handler(commands=["start"])
+def start(message):
+
+    send_start_screen(
+        message.chat.id
+    )
+
+
+# =========================================================
+# FREE
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data == "free"
+)
+def free_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    send_home(
+        call.message.chat.id
+    )
+
+
+# =========================================================
+# PAID
+# =========================================================
+# =========================================================
+# I PAID
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("paid:")
+)
+def paid_confirm(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+        plan_id = int(
+            call.data.split(":")[1]
+        )
+
+    except (ValueError, IndexError):
+        bot.send_message(
+            call.message.chat.id,
+            "❌ Invalid payment request."
+        )
+        return
+
+    plan = get_plan(plan_id)
+
+    if not plan:
+        bot.send_message(
+            call.message.chat.id,
+            "❌ Plan not found."
+        )
+        return
+
+    uid = call.from_user.id
+
+    waiting_screenshot.add(uid)
+
+    pending_orders[uid] = {
+        "plan_id": plan_id
+    }
+
+    bot.send_message(
+        call.message.chat.id,
+        "📸 <b>𝙎𝙚𝙣𝙙 𝙮𝙤𝙪𝙧 𝙥𝙖𝙮𝙢𝙚𝙣𝙩 "
+        "𝙨𝙘𝙧𝙚𝙚𝙣𝙨𝙝𝙤𝙩.</b>\n\n"
+        "𝙎𝙘𝙧𝙚𝙚𝙣𝙨𝙝𝙤𝙩 𝙖𝙨 𝙖 𝙥𝙝𝙤𝙩𝙤 𝙨𝙚𝙣𝙙 𝙠𝙖𝙧𝙤."
+    )
+
+# =========================================================
+# START BACK
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data == "start"
+)
+def start_back(call):
+
+    bot.answer_callback_query(call.id)
+
+    send_start_screen(
+        call.message.chat.id
+    )
+
+
+# =========================================================
+# HOME
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data == "home"
+)
+def home_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    send_home(
+        call.message.chat.id
+    )
+
+
+# =========================================================
+# DEMO MENU
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data == "demo_menu"
+)
+def demo_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    send_demo_menu(
+        call.message.chat.id
+    )
+
+
+# =========================================================
+# PLAN
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("plan:")
+)
+def plan_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+
+        plan_id = int(
+            call.data.split(":")[1]
+        )
+
+    except Exception:
+
+        return
+
+    plan = get_plan(plan_id)
+
+    if not plan:
+        return
+
+    send_plan(
+        call.message.chat.id,
+        plan
+    )
+
+
+# =========================================================
+# DEMO PLAN SELECT
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("demo_plan:")
+)
+def demo_plan_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+
+        plan_id = int(
+            call.data.split(":")[1]
+        )
+
+    except Exception:
+
+        return
+
+    plan = get_plan(plan_id)
+
+    if not plan:
+        return
+
+    # Start from demo 1
+    send_demo(
+        call.message.chat.id,
+        call.from_user.id,
+        plan_id,
+        0
+    )
+
+
+# =========================================================
+# NEXT DEMO
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("next_demo:")
+)
+def next_demo_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+
+        parts = call.data.split(":")
+
+        plan_id = int(parts[1])
+        current_index = int(parts[2])
+
+    except Exception:
+
+        return
+
+    session = demo_sessions.get(
+        call.from_user.id
+    )
+
+    old_message_id = None
+
+    if session:
+
+        old_message_id = session.get(
+            "message_id"
+        )
+
+    # Next demo
+    send_demo(
+        call.message.chat.id,
+        call.from_user.id,
+        plan_id,
+        current_index + 1,
+        delete_message_id=old_message_id
+    )
+
+
+# =========================================================
+# DEMO OVER
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("demo_over:")
+)
+def demo_over_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+
+        plan_id = int(
+            call.data.split(":")[1]
+        )
+
+    except Exception:
+
+        return
+
+    session = demo_sessions.pop(
+        call.from_user.id,
+        None
+    )
+
+    if session:
+
+        try:
+
+            bot.delete_message(
+                call.message.chat.id,
+                session["message_id"]
+            )
+
+        except Exception:
+
+            pass
+
+    send_demo_over(
+        call.message.chat.id,
+        plan_id
+    )
+
+
+# =========================================================
+# BUY
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("buy:")
+)
+def buy_button(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+
+        plan_id = int(
+            call.data.split(":")[1]
+        )
+
+    except Exception:
+
+        return
+
+    plan = get_plan(plan_id)
+
+    if not plan:
+        return
+
+    send_payment(
+        call.message.chat.id,
+        call.from_user.id,
+        plan
+    )
+
+
+# =========================================================
+# PAID
+# =========================================================
+
+@bot.callback_query_handler(
+    func=lambda call: call.data.startswith("paid:")
+)
+def paid_confirm(call):
+
+    bot.answer_callback_query(call.id)
+
+    try:
+
+        plan_id = int(
+            call.data.split(":")[1]
+        )
+
+    except Exception:
+
+        return
+
+    plan = get_plan(plan_id)
+
+    if not plan:
+        return
+
+    uid = call.from_user.id
+
+    waiting_screenshot.add(uid)
+
+    pending_orders[uid] = {
+        "plan_id": plan_id
+    }
+
+    bot.send_message(
+        call.message.chat.id,
+        "📸 <b>𝙋𝙖𝙮𝙢𝙚𝙣𝙩 𝙨𝙘𝙧𝙚𝙚𝙣𝙨𝙝𝙤𝙩 𝙨𝙚𝙣𝙙 𝙠𝙖𝙧𝙤.</b>"
+    )
+
+
+# =========================================================
+# SCREENSHOT HANDLER
+# =========================================================
+
+# =========================================================
+# SCREENSHOT HANDLER
+# =========================================================
+
+@bot.message_handler(
+    content_types=["photo"]
+)
+def screenshot_handler(message):
+
+    uid = message.from_user.id
+
+    # User ne I PAID nahi dabaya
+    if uid not in waiting_screenshot:
+        return
+
+    order = pending_orders.get(uid)
+
+    if not order:
+        return
+
+    plan = get_plan(
+        order["plan_id"]
+    )
+
+    if not plan:
+        bot.reply_to(
+            message,
+            "❌ 𝙋𝙡𝙖𝙣 𝙣𝙤𝙩 𝙛𝙤𝙪𝙣𝙙."
+        )
+        return
+
+    screenshot_id = message.photo[-1].file_id
+
+    # =====================================================
+    # ADMIN BUTTONS
+    # =====================================================
+
+    kb = InlineKeyboardMarkup()
+
+    kb.row(
+        button(
+            "✅ 𝘼𝙋𝙋𝙍𝙊𝙑𝙀",
+            data=f"approve:{uid}:{plan['id']}",
+            style="success"
+        )
+    )
+
+    kb.row(
+        button(
+            "❌ 𝙍𝙀𝙅𝙀𝘾𝙏",
+            data=f"reject:{uid}:{plan['id']}",
+            style="danger"
+        )
+    )
+
+    # =====================================================
+    # SEND SCREENSHOT TO ADMIN
+    # =====================================================
+
+    try:
+
+        bot.send_photo(
+            ADMIN_ID,
+            screenshot_id,
+            caption=(
+                "💳 <b>𝙉𝙀𝙒 𝙋𝘼𝙔𝙈𝙀𝙉𝙏</b>\n\n"
+                f"👤 𝙐𝙨𝙚𝙧 𝙄𝘿: <code>{uid}</code>\n"
+                f"📦 𝙋𝙡𝙖𝙣: {plan['name']}\n"
+                f"💰 𝘼𝙢𝙤𝙪𝙣𝙩: ₹{plan['price']}"
+            ),
+            reply_markup=kb
+        )
+
+        # Screenshot successfully sent to admin
+        waiting_screenshot.discard(uid)
+        pending_orders.pop(uid, None)
+
+        # User confirmation
+        bot.reply_to(
+            message,
+            "✅ <b>𝙎𝘾𝙍𝙀𝙀𝙉𝙎𝙃𝙊𝙏 𝙎𝙐𝘽𝙈𝙄𝙏𝙏𝙀𝘿</b>\n\n"
+            "⏳ 𝙔𝙤𝙪𝙧 𝙥𝙖𝙮𝙢𝙚𝙣𝙩 𝙞𝙨 𝙪𝙣𝙙𝙚𝙧 𝙧𝙚𝙫𝙞𝙚𝙬."
+        )
+
+    except Exception:
+
+        log.exception(
+            "Could not send payment screenshot to admin"
+        )
+
+        bot.reply_to(
+            message,
+            "❌ <b>𝙎𝙪𝙗𝙢𝙞𝙨𝙨𝙞𝙤𝙣 𝙛𝙖𝙞𝙡𝙚𝙙.</b>\n\n"
+            "𝙋𝙡𝙚𝙖𝙨𝙚 𝙩𝙧𝙮 𝙖𝙜𝙖𝙞𝙣."
+        )
+
+# =========================================================
+# ADMIN MEDIA ID MODE
+# =========================================================
+#
+# IMPORTANT:
+# Ab photo/video bhejne par ID automatically nahi milegi
+# jab tak admin /getid command na kare.
+#
+# Admin:
+# /getid
+#
+# Bot:
+# Send photo/video/document
+#
+# Phir bot exact FILE ID reply karega.
+#
+
+admin_waiting_media_id = set()
+
+
+@bot.message_handler(
+    commands=["getid"]
+)
+def getid_command(message):
+
+    if message.from_user.id != ADMIN_ID:
+
+        bot.reply_to(
+            message,
+            "❌ Not allowed."
+        )
+
+        return
+
+    admin_waiting_media_id.add(
+        message.from_user.id
+    )
+
+    bot.reply_to(
+        message,
+        "📸 <b>𝙎𝙚𝙣𝙙 𝙥𝙝𝙤𝙩𝙤, 𝙫𝙞𝙙𝙚𝙤 𝙤𝙧 𝙙𝙤𝙘𝙪𝙢𝙚𝙣𝙩 𝙣𝙤𝙬.</b>\n\n"
+        "𝙄 𝙬𝙞𝙡𝙡 𝙧𝙚𝙥𝙡𝙮 𝙬𝙞𝙩𝙝 𝙩𝙝𝙚 𝙁𝙞𝙡𝙚 𝙄𝘿."
+    )
+
+
+# =========================================================
+# ADMIN PHOTO ID
+# =========================================================
+
+@bot.message_handler(
+    content_types=["photo"]
+)
+def admin_photo_id(message):
+
+    uid = message.from_user.id
+
+    if uid != ADMIN_ID:
+        return
+
+    if uid not in admin_waiting_media_id:
+        return
+
+    file_id = message.photo[-1].file_id
+
+    admin_waiting_media_id.discard(uid)
+
+    bot.reply_to(
+        message,
+        "📸 <b>PHOTO FILE ID:</b>\n\n"
+        f"<code>{file_id}</code>"
+    )
+
+
+# =========================================================
+# ADMIN VIDEO ID
+# =========================================================
+
+@bot.message_handler(
+    content_types=["video"]
+)
+def admin_video_id(message):
+
+    uid = message.from_user.id
+
+    if uid != ADMIN_ID:
+        return
+
+    if uid not in admin_waiting_media_id:
+        return
+
+    file_id = message.video.file_id
+
+    admin_waiting_media_id.discard(uid)
+
+    bot.reply_to(
+        message,
+        "🎬 <b>VIDEO FILE ID:</b>\n\n"
+        f"<code>{file_id}</code>"
+    )
+
+
+# =========================================================
+# ADMIN DOCUMENT ID
+# =========================================================
+
+@bot.message_handler(
+    content_types=["document"]
+)
+def admin_document_id(message):
+
+    uid = message.from_user.id
+
+    if uid != ADMIN_ID:
+        return
+
+    if uid not in admin_waiting_media_id:
+        return
+
+    file_id = message.document.file_id
+
+    admin_waiting_media_id.discard(uid)
+
+    bot.reply_to(
+        message,
+        "📁 <b>DOCUMENT FILE ID:</b>\n\n"
+        f"<code>{file_id}</code>"
+    )
+
+
+# =========================================================
+# ADMIN ONLY - /id
+# =========================================================
+# Optional shortcut:
+# /id ke baad photo/video/document bhejo.
+
+@bot.message_handler(
+    commands=["id"]
+)
+def id_command(message):
+
+    if message.from_user.id != ADMIN_ID:
+
+        bot.reply_to(
+            message,
+            "❌ Not allowed."
+        )
+
+        return
+
+    admin_waiting_media_id.add(
+        message.from_user.id
+    )
+
+    bot.reply_to(
+        message,
+        "📲 <b>Media bhejo.</b>\n\n"
+        "𝙋𝙝𝙤𝙩𝙤 / 𝙑𝙞𝙙𝙚𝙤 / 𝘿𝙤𝙘𝙪𝙢𝙚𝙣𝙩"
+    )
+
+
+# =========================================================
+# RUN
+# =========================================================
+
+if __name__ == "__main__":
+
+    log.info(
+        "Bot started successfully."
+    )
+
+    bot.infinity_polling(
+        skip_pending=True,
+        timeout=30,
+        long_polling_timeout=30
+    )
+ 
