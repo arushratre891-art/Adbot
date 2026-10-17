@@ -189,7 +189,7 @@ PLANS = [
         "videos": "56000+",
 
         "image": "https://ibb.co/HLw36KQ4",
-        "qr": "https://ibb.co/4n9q8mK2",
+        "qr": "https://ibb.co/CpxpsLxk",
 
         "demos": [
             {"type": "video", "id": "https://videotourl.com/videos/1791611037316-4db456f2-f82c-4468-9f48-381341ed6e55.mp4"},
@@ -293,7 +293,7 @@ PLANS = [
         "videos": "70000+",
 
         "image": "https://ibb.co/qFhKnzcH",
-        "qr": "https://ibb.co/tMVzjb0D",
+        "qr": "https://ibb.co/Kx87TKnr",
 
         "demos": [
             {
@@ -348,7 +348,7 @@ PLANS = [
         "validity": "180 days",
         "videos": "100000+",
         "image": "https://ibb.co/84598K8j",
-        "qr": "https://ibb.co/MDWVSzF8",
+        "qr": "https://ibb.co/FTwWsx3",
 
         "caption": (
             "1. 𝙔𝙊𝙐 𝘾𝘼𝙉 𝙎𝘼𝙑𝙀 𝙄𝙉 𝙂𝘼𝙇𝙇𝙀𝙍𝙔 ✅\n"
