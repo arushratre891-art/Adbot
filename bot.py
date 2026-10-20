@@ -244,7 +244,7 @@ PLANS = [
     }
 ]
 
-STYLE_SERIES = ["danger"]
+STYLE_SERIES = ["danger", "success", "primary", "danger", "success", "primary"]
 
 def button(text, data=None, url=None, style=None):
     kwargs = {"text": text}
@@ -289,14 +289,15 @@ def send_photo_or_text(chat_id, image, caption, reply_markup=None):
         log.exception("Could not send configured image")
         bot.send_message(chat_id, caption, reply_markup=reply_markup)
 
-# =========================================================
-# START & HOME SCREENS
-# =========================================================
-
 START_CAPTION = " 𝘽𝙚𝙛𝙤𝙧𝙚 𝙘𝙤𝙣𝙩𝙞𝙣𝙪𝙞𝙣𝙜, 𝙥𝙡𝙚𝙖𝙨𝙚 𝙘𝙤𝙣𝙛𝙞𝙧𝙢 𝙮𝙤𝙪 𝙖𝙧𝙚 18 𝙤𝙧 𝙤𝙡𝙙𝙚𝙧."
 
 def send_start_screen(chat_id):
-    send_home(chat_id)
+    kb = InlineKeyboardMarkup()
+    kb.row(
+        button(" 𝙔𝙀𝙎 𝙄 𝘼𝙈 18+ ✅", data="free", style="success"),
+        button("𝙄 𝘼𝙈 𝙉𝙊𝙏 18+ ❌", data="paid_warning", style="danger")
+    )
+    send_photo_or_text(chat_id, START_IMAGE, START_CAPTION, kb)
 
 def send_paid_screen(chat_id):
     kb = InlineKeyboardMarkup()
@@ -304,7 +305,7 @@ def send_paid_screen(chat_id):
     bot.send_message(chat_id, " <b>𝙏𝙃𝙄𝙎 𝘽𝙊𝙏 𝙄𝙎 𝙊𝙉𝙇𝙔 𝙁𝙊𝙍 18+ 𝙐𝙎𝙀𝙍𝙎‼️</b>\n\n", reply_markup=kb)
 
 WELCOME_CAPTION = (
-    "<b> 𝙃𝙀𝙔 👋🏻, 𝙒𝙚𝙡𝙘𝙤𝙢ε 𝙩𝙤 𝙤𝙪𝙧 𝙫𝙞𝙥 𝙗𝙤𝙩  😍</b> \n\n"
+    "<b> 𝙃𝙀𝙔 👋🏻, 𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝙩𝙤 𝙤𝙪𝙧 𝙫𝙞𝙥 𝙗𝙤𝙩  😍</b> \n\n"
     "𝙏𝙃𝙄𝙎 𝘽𝙊𝙏 𝘾𝙊𝙉𝘼𝙏𝘼𝙄𝙉 𝙁𝙊𝙇𝙇𝙊𝙒𝙄𝙉𝙂 𝙋𝙇𝘼𝙉𝙎 ✅\n"
     "𝙎𝙏𝘼𝙍𝙏𝙄𝙉𝙂 𝙋𝙍𝙄𝘾𝙀 𝙄𝙎 𝙅𝙐𝙎𝙏 ₹39 ‼️\n\n"
     "𝘽𝙀𝙉𝙄𝙁𝙄𝙏𝙎 𝙊𝙐𝙍 𝘽𝙊𝙏 ✅ \n"
@@ -317,44 +318,13 @@ WELCOME_CAPTION = (
 
 def send_home(chat_id):
     kb = InlineKeyboardMarkup()
-
     active_plans = [p for p in PLANS if p.get("active")]
+    for i, p in enumerate(active_plans):
+        add_styled(kb, f" {p['name']} · ₹{p['price']}", data=f"plan:{p['id']}", index=i)
 
-    # All plan buttons: RED
-    for p in active_plans:
-        kb.add(
-            button(
-                f"{p['name']} · ₹{p['price']}",
-                data=f"plan:{p['id']}",
-                style="danger"
-            )
-        )
-
-    # Demo: BLUE
-    kb.add(
-        button(
-            "🎬 𝘿𝙀𝙈𝙊",
-            data="demo_menu",
-            style="primary"
-        )
-    )
-
-    # Support: GREEN
-    kb.add(
-        button(
-            "𝙎𝙐𝙋𝙋𝙊𝙍𝙏 📞",
-            url=SUPPORT_LINK,
-            style="success"
-        )
-    )
-
-    # Welcome caption only; no image
-    bot.send_message(
-        chat_id,
-        WELCOME_CAPTION,
-        parse_mode="HTML",
-        reply_markup=kb
-    )
+    add_styled(kb, "🎬 𝘿𝙀𝙈𝙊", data="demo_menu", index=0)
+    add_styled(kb, " 𝙎𝙐𝙋𝙋𝙊𝙍𝙏📞", url=SUPPORT_LINK, index=1)
+    send_photo_or_text(chat_id, WELCOME_IMAGE, WELCOME_CAPTION, kb)
 
 def send_demo_menu(chat_id):
     kb = InlineKeyboardMarkup()
@@ -364,12 +334,7 @@ def send_demo_menu(chat_id):
     add_styled(kb, "🔙 𝘽𝘼𝘾𝙆", data="home", index=2)
     bot.send_message(chat_id, "🎬 <b>𝘿𝙀𝙈𝙊</b>\n\n𝘿𝙚𝙢𝙤 𝙙𝙚𝙠𝙝𝙣𝙚 𝙠𝙚 𝙡𝙞𝙮𝙚 𝙠𝙤𝙞 𝙥𝙡𝙖𝙣 𝙨𝙚𝙡𝙚𝙘𝙩 𝙠𝙖𝙧𝙤.\n\n👇 <b>𝙎𝙚𝙡𝙚𝙘𝙩 𝙖 𝙥𝙡𝙖𝙣:</b>", reply_markup=kb)
 
-# =========================================================
-# PLAN DETAILS & MEDIA GROUP DEMOS
-# =========================================================
-
 def send_plan(chat_id, plan):
-    # Plan 10 Direct Payment QR
     if plan["id"] == 10:
         send_payment(chat_id, chat_id, plan)
         return
@@ -392,7 +357,7 @@ def send_plan(chat_id, plan):
         f"📦 <b>{plan['name']}</b>\n\n"
         f"💰 <b>𝙋𝙧𝙞𝙘𝙚:</b> ₹{plan['price']}\n"
         f"⏳ <b>𝙑𝙖𝙡𝙞𝙙𝙞𝙩𝙮:</b> {plan['validity']}\n"
-        f"🎬 <b>𝙑𝙞𝙙𝙚𝙊𝙎:</b> {plan['videos']}\n\n"
+        f"🎬 <b>𝙑𝙞𝙙𝙚𝙤𝙨:</b> {plan['videos']}\n\n"
         f"{plan['caption']}"
     )
     kb = InlineKeyboardMarkup()
@@ -431,7 +396,6 @@ def send_payment(chat_id, user_id, plan):
     bot.send_photo(chat_id, photo=qr_buffer, caption=caption, parse_mode="HTML", reply_markup=kb)
     waiting_screenshot.add(user_id)
     pending_orders[user_id] = {"plan_id": plan["id"], "txn_id": txn_id}
-
 waiting_screenshot = set()
 pending_orders = {}
 
@@ -666,3 +630,4 @@ def process_get_id(message):
 if __name__ == "__main__":
     log.info("🚀 Bot is starting...")
     bot.infinity_polling()
+    
